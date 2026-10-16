@@ -1,0 +1,8 @@
+# Project-owned link-check exclusions, merged with the canonical .limen/lychee.toml.
+exclude = [
+  # The site's own hostnames: the canonical URL in each page head and the
+  # Pages hostname. Checking them from the tree would test the deployment,
+  # not the content, and fails until the first deploy.
+  '^https://taciturn\.forkcloser\.org(/|$)',
+  '^https://website-taciturn\.pages\.dev(/|$)',
+]

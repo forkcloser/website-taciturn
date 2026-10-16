@@ -1,0 +1,15 @@
+# Served by Cloudflare Pages; applied to every response.
+#
+# The policy is same-origin only, which the site's own test enforces on the
+# markup: no scripts, styles, fonts or images from anywhere else. The pages
+# carry no inline script yet; the day one is added (the theme snippet in
+# each head), its hash joins script-src (sha256 of the text between the
+# script tags, base64).
+/*
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
