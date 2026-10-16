@@ -1,0 +1,82 @@
+/* taciturn — what is particular to this site, on top of forkcloser.css:
+ * the hero layout, the terminal blocks, the pillars, the definition list,
+ * and the comparison table's reflow on a phone. */
+
+/* Hero: copy on the left, the session on the right. */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--s-12);
+  align-items: start;
+  padding: var(--s-12) 0 var(--s-16);
+}
+.hero h1 { margin-bottom: var(--s-6); }
+.meta { color: var(--ink-3); font-size: var(--text-sm); }
+
+/* A terminal block: a comment above each command says what the reader gets
+ * from it; the prompt is not part of what they paste. */
+.term { font-size: var(--text-xs); white-space: pre-wrap; overflow-wrap: anywhere; }
+.term .p { color: var(--ink-3); user-select: none; }
+.term .c { color: var(--ink-3); }
+.term + .term, p + .term { margin-top: var(--s-4); }
+.term + p, .term + h3 { margin-top: var(--s-6); }
+
+/* Why: three pillars side by side, each a heading and its paragraph. */
+.pillars {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-8);
+}
+.pillars h3 { margin-top: 0; }
+.pillars p { max-width: none; }
+.pillars .term { margin-top: var(--s-4); }
+
+/* How it works: term on its own line, definition beneath. */
+.stack { margin: 0; }
+.stack dt { font-weight: 600; margin-top: var(--s-6); }
+.stack dt:first-child { margin-top: 0; }
+.stack dd { margin: var(--s-1) 0 0; }
+
+/* Compared: the row header column in the text face, the first column narrow. */
+.compare th[scope="row"] {
+  font-weight: 600;
+  white-space: nowrap;
+  padding-right: var(--s-6);
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.compare thead th:first-child { border-bottom-color: var(--line-strong); }
+.compare td { max-width: 28ch; }
+
+@media (max-width: 1000px) {
+  .hero { grid-template-columns: minmax(0, 1fr); gap: var(--s-8); padding-top: var(--s-8); }
+  .pillars { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* On a phone four columns do not fit, and a table scrolled sideways is
+ * unreadable. Each row reflows: the row's heading, then one line per
+ * product, labelled from the cell's data-product. The header row is hidden
+ * from sight only; the roles on the markup keep it a table for assistive
+ * technology, which browsers otherwise drop once a table element is no
+ * longer displayed as one. */
+@media (max-width: 600px) {
+  .compare, .compare tbody, .compare tr, .compare td, .compare th[scope="row"] { display: block; }
+  .compare thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .compare tr { padding: var(--s-3) 0; border-bottom: 1px solid var(--line); }
+  .compare th[scope="row"] { white-space: normal; padding: 0 0 var(--s-2); border: 0; }
+  .compare td { padding: var(--s-1) 0; border: 0; max-width: var(--measure); }
+  .compare td::before {
+    content: attr(data-product);
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    font-family: var(--mono);
+  }
+}

@@ -4,14 +4,176 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>taciturn</title>
-  <meta name="description" content="taciturn: an ssh-agent for keys in the Mac's Secure Enclave, with a per-key policy and an audit log, for unattended sessions.">
+  <meta name="description" content="An ssh-agent for keys in the Mac's Secure Enclave, with a per-key policy and an audit log, for unattended sessions.">
   <link rel="canonical" href="https://taciturn.forkcloser.org/">
+  <meta name="theme-color" content="#fbf8f2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1d1a16" media="(prefers-color-scheme: dark)">
+  <script>try{var t=localStorage.getItem("forkcloser-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+  <link rel="stylesheet" href="forkcloser.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <meta property="og:url" content="https://taciturn.forkcloser.org/">
+  <meta property="og:title" content="taciturn">
+  <meta property="og:description" content="An ssh-agent for keys in the Mac's Secure Enclave, with a per-key policy and an audit log, for unattended sessions.">
+  <script src="forkcloser.js" defer></script>
 </head>
 <body>
-  <main>
-    <h1>taciturn</h1>
-    <p>An ssh-agent for keys in the Mac's Secure Enclave, with a per-key policy and an audit log, for unattended sessions.</p>
-    <p>This site is being built. The project is at <a href="https://github.com/forkcloser/taciturn">github.com/forkcloser/taciturn</a>.</p>
-  </main>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="wrap top">
+  <a class="brand" href="./">
+    <svg class="mark" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M8 3v5a4 4 0 0 0 8 0V3"/>
+      <path d="M12 3v5M12 12v6"/>
+      <path class="table" d="M3 21h18"/>
+    </svg>
+    <span class="org">forkcloser</span><span class="sep">/</span>taciturn
+  </a>
+  <nav class="nav" aria-label="Site">
+    <a href="#install">Install</a>
+    <a href="https://github.com/forkcloser/taciturn">GitHub</a>
+    <button class="theme" type="button" aria-label="Theme: system. Switch to light.">
+      <svg class="auto" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/></svg>
+      <svg class="sun" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="moon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </nav>
+</header>
+
+<main id="main">
+
+<div class="wrap hero">
+  <div>
+    <h1>An ssh-agent for keys in the Mac's Secure Enclave.</h1>
+    <p class="lede">For unattended work, a coding agent pushing and signing as a bot: the key cannot leave the Mac, and a policy says what it signs.</p>
+    <p class="meta"><a href="https://github.com/forkcloser/taciturn/releases/tag/v0.2.0">v0.2.0</a> · MIT · Apple silicon, macOS 15 or later · <a href="#install">Install</a></p>
+  </div>
+
+  <div>
+    <pre class="term" aria-label="A session: a key is created, allowed at GitHub, used, and its log read"><code><span class="c"># A key made inside the Enclave. It signs with the screen locked; the line printed is what GitHub takes.</span>
+<span class="p">$</span> taciturn key create bot -use locked -peers path=/usr/bin/ssh,path=/usr/bin/ssh-keygen
+<span class="c"># GitHub's host keys, to pin. Compare them with the fingerprints GitHub publishes.</span>
+<span class="p">$</span> ssh-keyscan github.com &gt; github.keys 2&gt;/dev/null
+<span class="c"># bot may authenticate to github.com as git, and nowhere else.</span>
+<span class="p">$</span> taciturn key allow bot -user git -host github.com -known-hosts github.keys
+<span class="c"># ssh and ssh-keygen now ask taciturn.</span>
+<span class="p">$</span> export SSH_AUTH_SOCK="$HOME/Library/Application Support/taciturn/agent.sock"
+<span class="c"># Bound to GitHub's host key and checked against the policy before anything is signed.</span>
+<span class="p">$</span> ssh -o IdentityFile=none -T git@github.com
+<span class="c"># Every request: which process, which key, which host, allowed or refused.</span>
+<span class="p">$</span> taciturn log -key bot</code></pre>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <h2>Why taciturn</h2>
+    <div class="pillars">
+      <div>
+        <h3>The key never leaves the Mac</h3>
+        <p>The Secure Enclave makes the key and keeps it: ECDSA P-256, the one curve it implements, with no export path at all. The key is an item in the data-protection keychain under taciturn's own access group, so a process not signed with that group cannot even see it, and the agent's socket is the only road to it. A disk image, a backup or another Mac gets nothing: the material is wrapped by this Enclave and unwraps nowhere else.</p>
+      </div>
+      <div>
+        <h3>A signature only for what the key may do</h3>
+        <p>Each key carries its own policy: which hosts it may authenticate to, as which user, pinned to the hosts' keys; which <code>ssh-keygen -Y sign</code> namespaces it may sign in; which programs may ask. The agent reads the destination OpenSSH binds to the connection, the user in the authentication request and the namespace in a signature request, and answers only inside the policy. At any other host the key is not offered. A forwarded agent gets nothing, and a client cannot add, remove or lock keys: to its clients the agent is read-only, and the policy is edited from the shell.</p>
+        <pre class="term"><code><span class="c"># Refused: at a host the policy does not name, no key is even offered.</span>
+<span class="p">$</span> ssh -o IdentityFile=none -T git@gitlab.com
+<span class="c"># And commits and tags, in the git namespace.</span>
+<span class="p">$</span> taciturn key sshsig bot -namespace git</code></pre>
+      </div>
+      <div>
+        <h3>Every use recorded</h3>
+        <p>One line per request, allowed or refused: the process that asked, by path and signing identity, the key, the host and user or the namespace, and the rule that decided. A refused client is told nothing but failure; the reason is in the log. Nothing is asked of the Enclave for a request a rule refused, so the log is also the record of what was not signed. <code>taciturn log</code> prints it, <code>-follow</code> tails it, <code>-json</code> passes it through.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tint">
+  <div class="wrap">
+    <h2>How it works</h2>
+    <dl class="stack">
+      <dt>The agent</dt>
+      <dd>One binary, <code>taciturn</code>, running as a user LaunchAgent, <code>org.forkcloser.taciturn</code>, on a fixed socket, <code>~/Library/Application Support/taciturn/agent.sock</code>. <code>taciturn install</code> writes the LaunchAgent and starts it; <code>taciturn status</code> and <code>taciturn doctor</code> report on it. It ships as <code>Taciturn.app</code>, signed with a Developer ID, because the keychain access group needs a signed bundle: a command-line tool that happens to live in one, run by path, never through the Finder.</dd>
+      <dt>Keys</dt>
+      <dd>Made in the Enclave by <code>taciturn key create</code>, each with a class chosen at creation: <code>locked</code>, which signs while the screen is locked, until the next boot, or <code>unlocked</code>, which signs only while the session is unlocked. The key lives in the keychain, labelled by its fingerprint; what is on disk under <code>~/Library/Application Support/taciturn/keys</code> is a record of name, class, public key and policy, with no key material.</dd>
+      <dt>Policy</dt>
+      <dd>Three lists per key. Destinations: a user, a host, and the host's keys copied from a known_hosts file by <code>taciturn key allow</code>; the keys are the truth, since the protocol carries the server's key and never its name. Namespaces: what <code>taciturn key sshsig</code> allowed. Peers: who may ask, as <code>any</code>, a <code>path=</code> glob on the executable, or an Apple code-signing requirement, stated at creation and edited by <code>taciturn key peers</code>. The agent reads the store on every request, so an edit from the shell is live at the next request, with no reload and no second copy of the state.</dd>
+      <dt>The log</dt>
+      <dd>JSON lines in <code>~/Library/Logs/org.forkcloser.taciturn/audit.log</code>, the agent's only output: time, connection, peer process, request, key, binding, outcome and rule.</dd>
+      <dt>Unattended sessions</dt>
+      <dd>A sandboxed session reaches the socket and nothing else: the Enclave is unreachable from inside the sandbox, so a session that could read the key record still could not use it. The session's <code>ssh</code> is pointed at the socket with <code>IdentityAgent</code>, or <code>SSH_AUTH_SOCK</code>, and a <code>locked</code> key keeps signing after the screen locks, which is when unattended work happens. The client must be OpenSSH 8.9 or later, Apple's included: a client that does not bind the connection gets no authentication signature.</dd>
+      <dt>Rotation</dt>
+      <dd><code>taciturn key rotate</code> makes a successor in the Enclave with the same class and policy and serves both; <code>taciturn key signers</code> prints the allowed-signers line with its validity window, so commits the old key signed keep verifying and commits it signs after its retirement do not; <code>taciturn key retire</code> stops serving a key, <code>taciturn key delete</code> removes it and reminds you to revoke it on GitHub.</dd>
+    </dl>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <h2>Install</h2>
+    <p class="intro">An Apple silicon Mac on macOS 15 or later. Clients: OpenSSH 8.9 or later; the <code>ssh</code> and <code>ssh-keygen</code> macOS ships qualify.</p>
+    <pre class="term"><code><span class="c"># The one release asset: the bundle and nothing else.</span>
+<span class="p">$</span> curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.2.0/taciturn_0.2.0_darwin_arm64.tar.gz
+<span class="c"># The attestation GitHub recorded when the release workflow built it, checked against this repository.</span>
+<span class="p">$</span> gh attestation verify taciturn_0.2.0_darwin_arm64.tar.gz --repo forkcloser/taciturn
+<span class="c"># The bundle, in a folder that stays put: the LaunchAgent runs it by its real path.</span>
+<span class="p">$</span> mkdir -p ~/Applications &amp;&amp; tar -xzf taciturn_0.2.0_darwin_arm64.tar.gz -C ~/Applications
+<span class="c"># The commands on this page assume the binary on your PATH.</span>
+<span class="p">$</span> export PATH="$HOME/Applications/Taciturn.app/Contents/MacOS:$PATH"
+<span class="c"># The LaunchAgent, written and started.</span>
+<span class="p">$</span> taciturn install
+<span class="c"># The Enclave, the keychain group, the store, the agent and the socket, in one report.</span>
+<span class="p">$</span> taciturn doctor</code></pre>
+    <p>Download with <code>curl</code>, as above, not a browser: the bundle is signed but not notarized, and a browser download carries the quarantine flag that Gatekeeper acts on. Upgrading is the same steps with the new version, then <code>taciturn install</code> again, since the LaunchAgent names the binary's path.</p>
+    <h3>Without gh</h3>
+    <p>The checksums file is signed keyless by the release workflow and verifies with cosign; then the archive verifies against the file.</p>
+    <pre class="term"><code><span class="p">$</span> curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.2.0/checksums.txt
+<span class="p">$</span> curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.2.0/checksums.txt.sigstore.json
+<span class="p">$</span> cosign verify-blob --bundle checksums.txt.sigstore.json --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity https://github.com/forkcloser/taciturn/.github/workflows/release.yaml@refs/tags/v0.2.0 checksums.txt
+<span class="p">$</span> shasum -a 256 --ignore-missing -c checksums.txt</code></pre>
+    <p>For aqua users, taciturn is pinned as a <code>github_release</code> package with GitHub artifact attestation; the registry entry is in <a href="https://github.com/farcloser/limen-install">farcloser/limen-install</a>.</p>
+  </div>
+</section>
+
+<section class="tint">
+  <div class="wrap">
+    <h2>Compared</h2>
+    <p class="intro">OpenSSH's own agent, Secretive, and taciturn, on what each does with a key. 1Password's agent is left out: its documentation does not state enough for every cell.</p>
+    <div class="table-scroll">
+      <table class="compare" role="table">
+        <thead role="rowgroup"><tr role="row"><th role="columnheader">&nbsp;</th><th role="columnheader"><code>ssh-agent</code></th><th role="columnheader">Secretive</th><th role="columnheader">taciturn</th></tr></thead>
+        <tbody role="rowgroup">
+          <tr role="row"><th role="rowheader" scope="row">Where the key is</th><td role="cell" data-product="ssh-agent">Loaded from a key file by <code>ssh-add</code>, or on a FIDO or PKCS#11 token.</td><td role="cell" data-product="Secretive">The Secure Enclave, or a smart card; no export, by design.</td><td role="cell" data-product="taciturn">The Secure Enclave; the keychain item is visible only to code signed with taciturn's access group.</td></tr>
+          <tr role="row"><th role="rowheader" scope="row">Where it may be used</th><td role="cell" data-product="ssh-agent">Anywhere, unless the key was added with <code>ssh-add -h</code> destination constraints; by default it was not.</td><td role="cell" data-product="Secretive">Anywhere the client offers it, optionally behind Touch ID or Apple Watch; the agent checks no destination.</td><td role="cell" data-product="taciturn">The hosts, users and namespaces in the key's policy; at any other host the key is not offered.</td></tr>
+          <tr role="row"><th role="rowheader" scope="row">Through a forwarded agent</th><td role="cell" data-product="ssh-agent">Yes, unless constrained with <code>-h</code>.</td><td role="cell" data-product="Secretive">Yes: the binding that would reveal forwarding is not processed.</td><td role="cell" data-product="taciturn">Never: on a forwarding binding every key is hidden and every signature refused.</td></tr>
+          <tr role="row"><th role="rowheader" scope="row">With the screen locked</th><td role="cell" data-product="ssh-agent">Not affected: the keys are in a process of yours, not behind the lock.</td><td role="cell" data-product="Secretive">No: the agent refuses once the screen locks.</td><td role="cell" data-product="taciturn">Yes, for a key created <code>-use locked</code>, until the next boot.</td></tr>
+          <tr role="row"><th role="rowheader" scope="row">Record of use</th><td role="cell" data-product="ssh-agent">Debug output on stderr with <code>-d</code>.</td><td role="cell" data-product="Secretive">A notification per use.</td><td role="cell" data-product="taciturn">One audit line per request, allowed or refused, with the process, key, host and rule.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="https://github.com/forkcloser">
+      <svg class="mark" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M8 3v5a4 4 0 0 0 8 0V3"/>
+        <path d="M12 3v5M12 12v6"/>
+        <path class="table" d="M3 21h18"/>
+      </svg>
+      <span class="org">forkcloser</span>
+    </a>
+    <span>taciturn is MIT.</span>
+    <nav aria-label="Project links">
+      <a href="https://github.com/forkcloser/taciturn">Source</a>
+    </nav>
+  </div>
+</footer>
+
 </body>
 </html>
