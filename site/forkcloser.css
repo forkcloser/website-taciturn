@@ -1,0 +1,457 @@
+/* Forkcloser — shared visual identity for project sites.
+ *
+ * Scope: everything a project site inherits — colour, type, rhythm, the page
+ * chrome (header, footer, navigation, theme switch), and the styling of
+ * ordinary content (prose, code, tables, disclosures). A project adds its own
+ * stylesheet after this one for what is particular to it.
+ *
+ * Principles
+ *  - Nothing loads from elsewhere: system typefaces, inline mark, no fonts.
+ *  - Two themes, one token set. Every colour is a semantic token defined for
+ *    light, redefined for dark; components never name a raw colour.
+ *  - Contrast is verified, not assumed: each text token clears WCAG AA on
+ *    each ground it is used on, most clear AAA.
+ *  - Motion answers the reader (a theme change, a disclosure) and is short.
+ *    Reduced-motion turns it off entirely.
+ *
+ * Palette. From the Forkcloser picture — a steel fork on an oak table, a
+ * stoneware plate behind it, window light. Light is the plate and the
+ * light; dark is the oak at night. The ink is the steel. The one accent is
+ * the wood, used sparingly: the table line under the mark, focus rings, and
+ * the dash on section dividers. Farcloser's identity is this one's twin,
+ * the same structure with the temperature flipped: a cool flat with one
+ * warm line there, a warm table with one cool object here.
+ */
+
+:root {
+  /* Grounds and lines */
+  --bg: #fbf8f2;
+  --surface: #f2ecdf;
+  --code-bg: #efe8da;
+  --line: #d9d0bf;
+  --line-strong: #23262a;
+
+  /* Text */
+  --ink: #23262a;
+  --ink-2: #4e545a;
+  --ink-3: #5d646b;
+
+  /* Roles */
+  --accent: #965618;
+  --link: #3d5d78;
+  --link-hover: #23262a;
+  --focus: #965618;
+  --selection: #ead9bd;
+
+  /* Type */
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --text: 1.0625rem;
+  --text-sm: 0.9rem;
+  --text-xs: 0.8125rem;
+  --text-lg: 1.2rem;
+  --h3: 1.125rem;
+  --h2: 1.5rem;
+  --h1: clamp(2.1rem, 1.3rem + 3vw, 3.1rem);
+  --h1-page: 2rem;
+  --leading: 1.6;
+  --measure: 64ch;
+
+  /* Rhythm, 8px */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-6: 1.5rem;
+  --s-8: 2rem;
+  --s-12: 3rem;
+  --s-16: 4rem;
+  --s-20: 5rem;
+
+  /* Shape and motion */
+  --radius: 6px;
+  --radius-lg: 10px;
+  --wrap: 72rem;
+  --ease: 160ms ease;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1d1a16;
+    --surface: #26221d;
+    --code-bg: #2b261f;
+    --line: #403a31;
+    --line-strong: #e8e3d8;
+    --ink: #e8e3d8;
+    --ink-2: #bdb5a8;
+    --ink-3: #9a9285;
+    --accent: #dca45f;
+    --link: #9fbbd4;
+    --link-hover: #e8e3d8;
+    --focus: #dca45f;
+    --selection: #4a3a22;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #1d1a16;
+  --surface: #26221d;
+  --code-bg: #2b261f;
+  --line: #403a31;
+  --line-strong: #e8e3d8;
+  --ink: #e8e3d8;
+  --ink-2: #bdb5a8;
+  --ink-3: #9a9285;
+  --accent: #dca45f;
+  --link: #9fbbd4;
+  --link-hover: #e8e3d8;
+  --focus: #dca45f;
+  --selection: #4a3a22;
+  color-scheme: dark;
+}
+
+/* ---------- Base ---------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: var(--s-8);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--text);
+  line-height: var(--leading);
+  font-feature-settings: "kern", "liga", "calt";
+  text-rendering: optimizeLegibility;
+  transition: background-color var(--ease), color var(--ease);
+}
+
+::selection { background: var(--selection); color: var(--ink); }
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Every page begins with a skip link; invisible until it has focus. */
+.skip {
+  position: absolute;
+  left: var(--s-4);
+  top: var(--s-4);
+  padding: var(--s-2) var(--s-3);
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  transform: translateY(-200%);
+}
+.skip:focus { transform: none; }
+
+.wrap {
+  width: min(var(--wrap), 100% - 2 * var(--s-6));
+  margin-inline: auto;
+}
+
+/* ---------- Type ---------- */
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+h1 { font-size: var(--h1); line-height: 1.08; letter-spacing: -0.02em; }
+/* A secondary page's title: a heading, not a statement, so it sits between
+ * the landing page's h1 and an h2. Every page has exactly one h1. */
+h1.page { font-size: var(--h1-page); line-height: 1.15; margin-bottom: var(--s-3); }
+h2 { font-size: var(--h2); margin-bottom: var(--s-3); }
+h3 { font-size: var(--h3); margin-bottom: var(--s-2); }
+* + h3 { margin-top: var(--s-8); }
+
+p, ul, ol, dl { margin: 0 0 var(--s-4); }
+p, li, dd { max-width: var(--measure); }
+.lede { font-size: var(--text-lg); color: var(--ink-2); max-width: 48ch; }
+.intro { font-size: var(--text-lg); color: var(--ink-2); }
+.muted { color: var(--ink-3); }
+small, .small { font-size: var(--text-sm); }
+.label { font-size: var(--text-xs); color: var(--ink-3); margin: 0; }
+
+a {
+  color: var(--link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
+  text-decoration-color: color-mix(in srgb, var(--link) 45%, transparent);
+  transition: color var(--ease), text-decoration-color var(--ease);
+}
+a:hover { color: var(--link-hover); text-decoration-color: currentColor; }
+
+strong, b { font-weight: 600; }
+em { font-style: italic; }
+
+/* ---------- Code ---------- */
+
+code, kbd, samp, pre {
+  font-family: var(--mono);
+  font-size: 0.92em;
+  font-feature-settings: "calt" 0;
+}
+:not(pre) > code {
+  background: var(--code-bg);
+  padding: 0.08em 0.36em;
+  border-radius: 4px;
+  color: var(--ink);
+}
+pre {
+  margin: 0;
+  padding: var(--s-4) var(--s-6);
+  background: var(--code-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  line-height: 1.55;
+  font-size: var(--text-sm);
+  tab-size: 4;
+}
+pre code { font-size: inherit; background: none; padding: 0; }
+pre + p { margin-top: var(--s-4); }
+h1 code { font-size: 0.9em; font-weight: 500; }
+
+/* Minimal syntax roles for hand-marked examples. */
+.c { color: var(--ink-3); }
+.k { color: var(--link); }
+.s { color: var(--accent); }
+
+/* ---------- Chrome ---------- */
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3) var(--s-4);
+  min-height: 4rem;
+  padding: var(--s-3) 0;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
+}
+.brand:hover { color: var(--ink); }
+.brand .org {
+  color: var(--ink-3);
+  font-weight: 500;
+}
+.brand .sep { color: var(--line); font-weight: 400; }
+
+/* The mark: a fork in the text colour resting on the table line beneath,
+ * in the accent. Sized by font, so it sits with the name. */
+.mark {
+  width: 1.4em;
+  height: 1.4em;
+  flex: none;
+  color: var(--ink);
+}
+.mark .table { stroke: var(--accent); }
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-6);
+}
+.nav a {
+  color: var(--ink-2);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  padding: var(--s-1) 0;
+  border-bottom: 1px solid transparent;
+  transition: color var(--ease), border-color var(--ease);
+}
+.nav a:hover { color: var(--ink); }
+.nav a[aria-current] { color: var(--ink); border-bottom-color: var(--accent); }
+
+/* Theme switch: one button cycling system, light, dark. The icon shows the
+ * current state; the label says where the next press goes. */
+.theme {
+  appearance: none;
+  display: inline-grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  padding: 0;
+  margin-left: var(--s-2);
+  background: transparent;
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color var(--ease), border-color var(--ease), background-color var(--ease);
+}
+.theme:hover { color: var(--ink); border-color: var(--ink-3); }
+.theme svg { width: 1rem; height: 1rem; display: none; }
+:root:not([data-theme]) .theme .auto { display: block; }
+:root[data-theme="light"] .theme .sun { display: block; }
+:root[data-theme="dark"] .theme .moon { display: block; }
+
+main { display: block; }
+
+/* Sections divide on a hairline, with the table's dash at the left edge.
+ * The dash is the only decoration on the page. */
+section {
+  position: relative;
+  padding: var(--s-16) 0;
+  border-top: 1px solid var(--line);
+}
+section::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  /* The wrap's own left margin, so the dash starts where the text does. */
+  left: max(var(--s-6), calc((100% - var(--wrap)) / 2));
+  width: var(--s-12);
+  height: 2px;
+  background: var(--accent);
+}
+section.plain { border-top: 0; }
+section.plain::before { display: none; }
+section.tint { background: var(--surface); }
+section.tint pre, section.tint :not(pre) > code { background: var(--bg); }
+
+footer {
+  padding: var(--s-12) 0 var(--s-16);
+  border-top: 1px solid var(--line);
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+}
+footer .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+footer .brand { font-size: 1rem; }
+footer nav { display: flex; gap: var(--s-6); }
+footer a { color: var(--ink-2); }
+
+/* ---------- Content patterns ---------- */
+
+.split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-12);
+}
+.split > div > h3 { margin-top: 0; }
+
+.install { display: grid; gap: var(--s-2); max-width: 36rem; margin-top: var(--s-8); }
+.install pre { padding: var(--s-3) var(--s-4); font-size: var(--text-xs); white-space: pre-wrap; overflow-wrap: anywhere; }
+.install .label { margin-bottom: calc(-1 * var(--s-1)); }
+
+details { margin-top: var(--s-3); }
+details summary {
+  cursor: pointer;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  user-select: none;
+}
+details summary::-webkit-details-marker { display: none; }
+details summary::before {
+  content: "";
+  width: 0.45em;
+  height: 0.45em;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--ease);
+}
+details[open] summary::before { transform: rotate(45deg); }
+details summary:hover { color: var(--ink); }
+details > :not(summary) { margin-top: var(--s-3); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+th {
+  text-align: left;
+  font-weight: 600;
+  padding: var(--s-2) var(--s-4) var(--s-2) 0;
+  border-bottom: 1px solid var(--line-strong);
+}
+td {
+  padding: var(--s-3) var(--s-4) var(--s-3) 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+tr:target td { background: var(--surface); }
+.table-scroll { overflow-x: auto; }
+
+.tally {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-6);
+  margin: 0 0 var(--s-6);
+  padding: 0;
+  list-style: none;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+}
+.tally li::before {
+  content: "";
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  background: var(--dot, var(--ink-3));
+  margin-right: var(--s-2);
+  vertical-align: 0.05em;
+}
+.tally strong { color: var(--ink); font-weight: 600; }
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 820px) {
+  :root { --text: 1rem; }
+  .split { grid-template-columns: minmax(0, 1fr); gap: var(--s-8); }
+  section { padding: var(--s-12) 0; }
+  .nav { gap: var(--s-2) var(--s-4); }
+  .brand { font-size: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+@media print {
+  .top, footer, .theme, .skip { display: none; }
+  body { background: #fff; color: #000; }
+  a { color: inherit; text-decoration: none; }
+  section { border-top: 1px solid #000; padding: 1.5rem 0; }
+  section::before { display: none; }
+  pre { border: 1px solid #000; }
+}

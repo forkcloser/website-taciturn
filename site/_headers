@@ -1,12 +1,12 @@
 # Served by Cloudflare Pages; applied to every response.
 #
 # The policy is same-origin only, which the site's own test enforces on the
-# markup: no scripts, styles, fonts or images from anywhere else. The pages
-# carry no inline script yet; the day one is added (the theme snippet in
-# each head), its hash joins script-src (sha256 of the text between the
-# script tags, base64).
+# markup: no scripts, styles, fonts or images from anywhere else. The one
+# exception is the inline theme snippet in the page head, allowed by the
+# hash of its exact bytes; the csp test recomputes it from the page, so a
+# changed snippet fails until the hash follows.
 /*
-  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'none'; script-src 'self' 'sha256-C0uXeDV9tJo2Qt/ZbRdI+u33ZJpmBV9SzHuGK1zdMlg='; style-src 'self'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
