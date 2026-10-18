@@ -233,7 +233,7 @@ policy, audit log, or locked-screen behaviour at https://www.1password.dev/ssh/a
 
 ## Footer
 
-MIT; https://github.com/forkcloser/taciturn. (The Designer's.)
+taciturn is MIT (src: forkcloser/taciturn LICENSE); this site is CC BY-SA 4.0 (src: LICENSE); https://github.com/forkcloser/taciturn. (The Designer's.)
 
 ## Metadata
 
