@@ -5,9 +5,9 @@
 pins:
   - name: taciturn
     renovate: github-releases forkcloser/taciturn
-    version: 0.2.0
+    version: 0.3.0
     url: https://github.com/forkcloser/taciturn/releases/download/v${version}/taciturn_${version}_darwin_arm64.tar.gz
     verify: github-attestation forkcloser
     digest:
-      version: 0.2.0
-      sha256: c940aa3b267c0269ed3720aebb6c2fe84f04e390766b9b6612c6376374966ad4
+      version: 0.3.0
+      sha256: 6b75d37041be4468111bfba875341ce92dee05cdcba7f2757c3be3b7d913a65c

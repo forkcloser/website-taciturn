@@ -2,9 +2,9 @@
 
 The text of https://taciturn.forkcloser.org/, one section per heading below, in the order
 the page shows them. Every factual claim carries its source in a `(src: …)` parenthesis,
-to strip when the text is set: a file in forkcloser/taciturn at v0.2.0, a `taciturn`
+to strip when the text is set: a file in forkcloser/taciturn at v0.3.0, a `taciturn`
 usage line, or a document outside the project with its URL. Every command is for the
-pinned release, v0.2.0, and runs as pasted on a Mac that has the bundle on its `PATH`
+pinned release, v0.3.0, and runs as pasted on a Mac that has the bundle on its `PATH`
 (the Install section puts it there).
 
 ## Hero
@@ -31,10 +31,9 @@ taciturn log -key bot                                                           
 Sources, line by line:
 
 1. `key create NAME -use locked|unlocked -peers ENTRY[,ENTRY]` is the usage line
-   (src: internal/cli/cli.go, `usage` on main); the line passes `-peers` explicitly, so
-   it reads the same on v0.2.0, where the flag is optional and falls back to a built-in
-   list (src: v0.2.0 `internal/cli/keys.go`, `defaultPeers`), and from v0.2.1, where it
-   is required and no default exists (src: docs/design.md, decision 3); `path=` entries are absolute paths or globs as the
+   (src: internal/cli/cli.go, `usage`); `-peers` is required since v0.3.0 and no default
+   exists (src: docs/design.md, decision 3; https://github.com/forkcloser/taciturn/pull/14;
+   internal/cli/keys.go, `errPeers`); `path=` entries are absolute paths or globs as the
    peer's executable is reported (src: internal/cli/keys.go, `validPeer`;
    docs/design.md, "Policy", `peers`); Apple's `ssh` and `ssh-keygen` live at
    `/usr/bin` and sign as `com.apple.ssh` / `com.apple.ssh-keygen` (src:
@@ -128,8 +127,7 @@ from a known_hosts file by `key allow`; the keys are the truth, since the protoc
 the server's key and never its name. Namespaces: what `key sshsig` allowed. Peers: who may
 ask, as `any`, a `path=` glob on the executable, or an Apple code-signing requirement,
 stated at creation and edited by `key peers` (src: docs/design.md, "Policy"; usage;
-v0.2.0 fills the list in when `-peers` is absent, v0.2.1 refuses without it: decision 3).
-The
+`key create` refuses without `-peers` since v0.3.0: decision 3). The
 agent reads the store on every request, so an edit from the shell is live at the next
 request, with no reload and no second copy of the state (src: docs/design.md, "Keys", "The
 agent reads the directory on every request").
@@ -167,9 +165,9 @@ Clients: OpenSSH 8.9 or later; the `ssh` and `ssh-keygen` macOS ships qualify (s
 docs/design.md, F2 "OpenSSH 10.3p1", F8 "8.9 and later").
 
 ```bash
-curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.2.0/taciturn_0.2.0_darwin_arm64.tar.gz
-gh attestation verify taciturn_0.2.0_darwin_arm64.tar.gz --repo forkcloser/taciturn
-mkdir -p ~/Applications && tar -xzf taciturn_0.2.0_darwin_arm64.tar.gz -C ~/Applications
+curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.3.0/taciturn_0.3.0_darwin_arm64.tar.gz
+gh attestation verify taciturn_0.3.0_darwin_arm64.tar.gz --repo forkcloser/taciturn
+mkdir -p ~/Applications && tar -xzf taciturn_0.3.0_darwin_arm64.tar.gz -C ~/Applications
 export PATH="$HOME/Applications/Taciturn.app/Contents/MacOS:$PATH"
 taciturn install
 taciturn doctor
@@ -183,7 +181,7 @@ LaunchAgent, written and started; the Enclave, the keychain group, the store, th
 the socket, in one report.
 
 Sources: the asset name and the two sidecars, `checksums.txt` and
-`checksums.txt.sigstore.json` (src: https://github.com/forkcloser/taciturn/releases/tag/v0.2.0;
+`checksums.txt.sigstore.json` (src: https://github.com/forkcloser/taciturn/releases/tag/v0.3.0;
 .release-go.yaml, `archives` and `checksum`); the archive carries `Taciturn.app/Contents/…`
 at its top level and no bare binary (src: .release-go.yaml, `archives`, `files` and the
 comment above them); the attestation covers every `.tar.gz` and `checksums.txt` (src:
@@ -196,9 +194,9 @@ internal/cli/service.go, `runDoctor`; usage).
 verifies with cosign; then the archive verifies against the file:
 
 ```bash
-curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.2.0/checksums.txt
-curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.2.0/checksums.txt.sigstore.json
-cosign verify-blob --bundle checksums.txt.sigstore.json --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity https://github.com/forkcloser/taciturn/.github/workflows/release.yaml@refs/tags/v0.2.0 checksums.txt
+curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.3.0/checksums.txt
+curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.3.0/checksums.txt.sigstore.json
+cosign verify-blob --bundle checksums.txt.sigstore.json --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity https://github.com/forkcloser/taciturn/.github/workflows/release.yaml@refs/tags/v0.3.0 checksums.txt
 shasum -a 256 --ignore-missing -c checksums.txt
 ```
 
