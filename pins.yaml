@@ -2,16 +2,16 @@
 # this one (the pin test), and the macOS test leg runs this exact artifact
 # after checking its digest (the help test). Renovate moves the version;
 # `limen pins refresh` brings the digest along. The attestation is held to
-# the signing workflow by name: taciturn's own release.yaml up to v0.3.0;
-# from v0.4.0 taciturn releases through limen's Apple lane, so that bump
-# moves the signer to farcloser/limen/.github/workflows/limen-release-apple.yaml
-# or the refresh fails closed, which is the pin doing its job.
+# this repository and to the signing workflow by name: limen's Apple release
+# lane, which taciturn releases through since v0.4.0 (its own release.yaml
+# signed up to v0.3.0). A release signed by anything else fails the refresh
+# closed.
 pins:
   - name: taciturn
     renovate: github-releases forkcloser/taciturn
-    version: 0.3.0
+    version: 0.4.0
     url: https://github.com/forkcloser/taciturn/releases/download/v${version}/taciturn_${version}_darwin_arm64.tar.gz
-    verify: github-attestation forkcloser/taciturn forkcloser/taciturn/.github/workflows/release.yaml
+    verify: github-attestation forkcloser/taciturn farcloser/limen/.github/workflows/limen-release-apple.yaml
     digest:
-      version: 0.3.0
-      sha256: 6b75d37041be4468111bfba875341ce92dee05cdcba7f2757c3be3b7d913a65c
+      version: 0.4.0
+      sha256: 90007a17f7114f06540fcfa1add946f316f6e10555961c20177c5f35c1ddaeaf

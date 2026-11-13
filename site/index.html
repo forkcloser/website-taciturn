@@ -47,7 +47,7 @@
   <div>
     <h1>An ssh-agent for keys in the Mac's Secure Enclave.</h1>
     <p class="lede">For unattended work, a coding agent pushing and signing as a bot: the key cannot leave the Mac, and a policy says what it signs.</p>
-    <p class="meta"><a href="https://github.com/forkcloser/taciturn/releases/tag/v0.3.0">v0.3.0</a> · MIT · Apple silicon, macOS 15 or later · <a href="#install">Install</a></p>
+    <p class="meta"><a href="https://github.com/forkcloser/taciturn/releases/tag/v0.4.0">v0.4.0</a> · MIT · Apple silicon, macOS 15 or later · <a href="#install">Install</a></p>
   </div>
 
   <div>
@@ -115,11 +115,11 @@
     <h2>Install</h2>
     <p class="intro">An Apple silicon Mac on macOS 15 or later. Clients: OpenSSH 8.9 or later; the <code>ssh</code> and <code>ssh-keygen</code> macOS ships qualify.</p>
     <pre class="term"><code><span class="c"># The one release asset: the bundle and nothing else.</span>
-<span class="p">$</span> curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.3.0/taciturn_0.3.0_darwin_arm64.tar.gz
-<span class="c"># The attestation GitHub recorded when the release workflow built it, checked against this repository.</span>
-<span class="p">$</span> gh attestation verify taciturn_0.3.0_darwin_arm64.tar.gz --repo forkcloser/taciturn
+<span class="p">$</span> curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.4.0/taciturn_0.4.0_darwin_arm64.tar.gz
+<span class="c"># The attestation GitHub recorded when the release was built, checked against this repository and the workflow that signed it.</span>
+<span class="p">$</span> gh attestation verify taciturn_0.4.0_darwin_arm64.tar.gz --repo forkcloser/taciturn --signer-workflow farcloser/limen/.github/workflows/limen-release-apple.yaml
 <span class="c"># The bundle, in a folder that stays put: the LaunchAgent runs it by its real path.</span>
-<span class="p">$</span> mkdir -p ~/Applications &amp;&amp; tar -xzf taciturn_0.3.0_darwin_arm64.tar.gz -C ~/Applications
+<span class="p">$</span> mkdir -p ~/Applications &amp;&amp; tar -xzf taciturn_0.4.0_darwin_arm64.tar.gz -C ~/Applications
 <span class="c"># The commands on this page assume the binary on your PATH.</span>
 <span class="p">$</span> export PATH="$HOME/Applications/Taciturn.app/Contents/MacOS:$PATH"
 <span class="c"># The LaunchAgent, written and started.</span>
@@ -128,10 +128,10 @@
 <span class="p">$</span> taciturn doctor</code></pre>
     <p>Download with <code>curl</code>, as above, not a browser: the bundle is signed but not notarized, and a browser download carries the quarantine flag that Gatekeeper acts on. Upgrading is the same steps with the new version, then <code>taciturn install</code> again, since the LaunchAgent names the binary's path.</p>
     <h3>Without gh</h3>
-    <p>The checksums file is signed keyless by the release workflow and verifies with cosign; then the archive verifies against the file.</p>
-    <pre class="term"><code><span class="p">$</span> curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.3.0/checksums.txt
-<span class="p">$</span> curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.3.0/checksums.txt.sigstore.json
-<span class="p">$</span> cosign verify-blob --bundle checksums.txt.sigstore.json --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity https://github.com/forkcloser/taciturn/.github/workflows/release.yaml@refs/tags/v0.3.0 checksums.txt
+    <p>The checksums file is signed keyless by the workflow the release runs on, and verifies with cosign against that workflow, this repository and the tag; then the archive verifies against the file.</p>
+    <pre class="term"><code><span class="p">$</span> curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.4.0/checksums.txt
+<span class="p">$</span> curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.4.0/checksums.txt.sigstore.json
+<span class="p">$</span> cosign verify-blob --bundle checksums.txt.sigstore.json --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity-regexp '^https://github\.com/farcloser/limen/\.github/workflows/limen-release-apple\.yaml@' --certificate-github-workflow-repository forkcloser/taciturn --certificate-github-workflow-ref refs/tags/v0.4.0 checksums.txt
 <span class="p">$</span> shasum -a 256 --ignore-missing -c checksums.txt</code></pre>
     <p>For aqua users, taciturn is pinned as a <code>github_release</code> package with GitHub artifact attestation; the registry entry is in <a href="https://github.com/farcloser/limen-install">farcloser/limen-install</a>.</p>
   </div>

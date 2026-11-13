@@ -2,9 +2,9 @@
 
 The text of https://taciturn.forkcloser.org/, one section per heading below, in the order
 the page shows them. Every factual claim carries its source in a `(src: …)` parenthesis,
-to strip when the text is set: a file in forkcloser/taciturn at v0.3.0, a `taciturn`
+to strip when the text is set: a file in forkcloser/taciturn at v0.4.0, a `taciturn`
 usage line, or a document outside the project with its URL. Every command is for the
-pinned release, v0.3.0, and runs as pasted on a Mac that has the bundle on its `PATH`
+pinned release, v0.4.0, and runs as pasted on a Mac that has the bundle on its `PATH`
 (the Install section puts it there).
 
 ## Hero
@@ -155,8 +155,9 @@ mechanism is the allowed-signers format"; internal/cli/keys.go, `keySigners`).
 ## Install
 
 **Requirements, one line:** An Apple silicon Mac on macOS 15 or later (src: README.md,
-"darwin/arm64 only"; the release is built on `macos-15`, .github/workflows/release.yaml,
-`runs-on`; the fleet's platform floor is macOS 15, farcloser/limen book/github.md, the
+"darwin/arm64 only"; the release is built on `macos-15`, farcloser/limen
+.github/workflows/limen-release-apple.yaml, `runs-on`, the lane .github/workflows/release.yaml
+calls; the fleet's platform floor is macOS 15, farcloser/limen book/github.md, the
 runner matrix, and forkcloser/openssh build.sh, `MACOSX_DEPLOYMENT_TARGET=15.0`; developed
 on macOS 26, docs/design.md header). The bundle's plist says `LSMinimumSystemVersion`
 14.0 (hack/bundle.sh); nothing is built or tested on 14, and the Taciturn session has the
@@ -165,47 +166,53 @@ Clients: OpenSSH 8.9 or later; the `ssh` and `ssh-keygen` macOS ships qualify (s
 docs/design.md, F2 "OpenSSH 10.3p1", F8 "8.9 and later").
 
 ```bash
-curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.3.0/taciturn_0.3.0_darwin_arm64.tar.gz
-gh attestation verify taciturn_0.3.0_darwin_arm64.tar.gz --repo forkcloser/taciturn
-mkdir -p ~/Applications && tar -xzf taciturn_0.3.0_darwin_arm64.tar.gz -C ~/Applications
+curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.4.0/taciturn_0.4.0_darwin_arm64.tar.gz
+gh attestation verify taciturn_0.4.0_darwin_arm64.tar.gz --repo forkcloser/taciturn --signer-workflow farcloser/limen/.github/workflows/limen-release-apple.yaml
+mkdir -p ~/Applications && tar -xzf taciturn_0.4.0_darwin_arm64.tar.gz -C ~/Applications
 export PATH="$HOME/Applications/Taciturn.app/Contents/MacOS:$PATH"
 taciturn install
 taciturn doctor
 ```
 
 Comments for the block, one per line, in order: the one release asset, the bundle and
-nothing else; the attestation GitHub recorded when the release workflow built it, checked
-against this repository; the bundle, in a folder that stays put, since the LaunchAgent
+nothing else; the attestation GitHub recorded when the release was built, checked against
+this repository and the workflow that signed it; the bundle, in a folder that stays put, since the LaunchAgent
 runs it by its real path; the commands on this page assume the binary on your `PATH`; the
 LaunchAgent, written and started; the Enclave, the keychain group, the store, the agent and
 the socket, in one report.
 
 Sources: the asset name and the two sidecars, `checksums.txt` and
-`checksums.txt.sigstore.json` (src: https://github.com/forkcloser/taciturn/releases/tag/v0.3.0;
+`checksums.txt.sigstore.json` (src: https://github.com/forkcloser/taciturn/releases/tag/v0.4.0;
 .release-go.yaml, `archives` and `checksum`); the archive carries `Taciturn.app/Contents/…`
 at its top level and no bare binary (src: .release-go.yaml, `archives`, `files` and the
-comment above them); the attestation covers every `.tar.gz` and `checksums.txt` (src:
-.github/workflows/release.yaml, the `attest-build-provenance` step); `install` writes the
+comment above them); the attestation covers every `.tar.gz` and `checksums.txt`, and its signer is the lane,
+not this repository's workflow, so `gh` is told the signer (src: farcloser/limen
+.github/workflows/limen-release-apple.yaml, the `attest-build-provenance` step;
+.release-go.yaml, the comment above `signs`; docs/design.md, "Released like the fleet"); `install` writes the
 plist with the binary's real path and starts the agent (src: docs/design.md, "The socket
 and the process"; internal/cli/service.go, `runInstall`); `doctor`'s checks (src:
 internal/cli/service.go, `runDoctor`; usage).
 
-**Without `gh`,** the checksums file is signed keyless by the release workflow and
-verifies with cosign; then the archive verifies against the file:
+**Without `gh`,** the checksums file is signed keyless by the workflow the release runs
+on, and verifies with cosign against that workflow, this repository and the tag; then the
+archive verifies against the file:
 
 ```bash
-curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.3.0/checksums.txt
-curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.3.0/checksums.txt.sigstore.json
-cosign verify-blob --bundle checksums.txt.sigstore.json --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity https://github.com/forkcloser/taciturn/.github/workflows/release.yaml@refs/tags/v0.3.0 checksums.txt
+curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.4.0/checksums.txt
+curl -LO https://github.com/forkcloser/taciturn/releases/download/v0.4.0/checksums.txt.sigstore.json
+cosign verify-blob --bundle checksums.txt.sigstore.json --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity-regexp '^https://github\.com/farcloser/limen/\.github/workflows/limen-release-apple\.yaml@' --certificate-github-workflow-repository forkcloser/taciturn --certificate-github-workflow-ref refs/tags/v0.4.0 checksums.txt
 shasum -a 256 --ignore-missing -c checksums.txt
 ```
 
 (src: .release-go.yaml, `signs` and the comment above it, which gives the verify command
-with a regexp identity; the exact identity is the workflow at the tag.)
+with the lane as a regexp identity. The certificate's identity is the lane at the limen
+commit the release called, which names no repository, so the page also requires the
+certificate's source repository and ref: the v0.4.0 certificate, read from
+`checksums.txt.sigstore.json`.)
 
 **Two notes under the block.** Download with `curl`, as above, not a browser: the bundle
 is signed but not notarized, and a browser download carries the quarantine flag that
-Gatekeeper acts on (src: docs/design.md, v0.2 "Release lane", "No notarization in v0.2").
+Gatekeeper acts on (src: docs/design.md, v0.2 "Release lane", "No notarization").
 Upgrading is the same steps with the new version, then `taciturn install` again, since the
 LaunchAgent names the binary's path (src: docs/design.md, "The socket and the process",
 "After an upgrade … `taciturn install` again").
