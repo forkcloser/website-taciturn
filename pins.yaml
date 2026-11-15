@@ -14,4 +14,5 @@ pins:
     verify: github-attestation forkcloser/taciturn farcloser/limen/.github/workflows/limen-release-apple.yaml
     digest:
       version: 0.4.0
+      source: f9c83956407211a643ed031a928a5c0393fdfd83821154d021d967d9662220ef
       sha256: 90007a17f7114f06540fcfa1add946f316f6e10555961c20177c5f35c1ddaeaf
